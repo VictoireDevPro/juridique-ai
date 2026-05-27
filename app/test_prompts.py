@@ -22,38 +22,38 @@ response = chain_question.invoke({
 print(response)
 
 # # ── Test 2 : analyse d'un mini contrat ───────────────────────────────
-# print("\n" + "=" * 50)
-# print("TEST 2 — Analyse de contrat")
-# print("=" * 50)
+print("\n" + "=" * 50)
+print("TEST 2 — Analyse de contrat")
+print("=" * 50)
 
-# chain_contrat = prompt_analyse_contrat | llm | StrOutputParser()
-# mini_contrat = """
-# CONTRAT DE VENTE
+chain_contrat = prompt_analyse_contrat | llm | StrOutputParser()
+mini_contrat = """
+CONTRAT DE VENTE
 
-# Entre M. Dupont Jean, vendeur, et Mme Mbongo Claire, acheteur.
-# Objet : Vente d'un véhicule Toyota Corolla 2019.
-# Prix : 8 000 000 FCFA payable en 3 versements.
-# Fait à Brazzaville, le 15 mai 2025.
-# Signatures : ...
-# """
+Entre M. Dupont Jean, vendeur, et Mme Mbongo Claire, acheteur.
+Objet : Vente d'un véhicule Toyota Corolla 2019.
+Prix : 8 000 000 FCFA payable en 3 versements.
+Fait à Brazzaville, le 15 mai 2025.
+Signatures : ...
+"""
 
-# response = chain_contrat.invoke({
-#     "contrat": mini_contrat
-# })
+response = chain_contrat.invoke({
+    "contrat": mini_contrat
+})
 
-# print(response)
+print(response)
 
-# # ── Test 3 : génération de clauses ─────────────────────────────────────
-# print("\n" + "=" * 50)
-# print("TEST 3 — Génération de clauses")
+# ── Test 3 : génération de clauses ─────────────────────────────────────
+print("\n" + "=" * 50)
+print("TEST 3 — Génération de clauses")
 
-# chain_generate_clauses  = prompt_generate_clauses | llm | StrOutputParser()
-# response = chain_generate_clauses.invoke({
-#     "contexte": "Contrat de prestation de services informatiques",
-#     "contrat": """
-# Entreprise A fournit des services de développement logiciel
-# à Entreprise B pour une durée de 12 mois.
-# """
-# })
+chain_generate_clauses  = prompt_generate_clauses | llm | StrOutputParser()
+response = chain_generate_clauses.invoke({
+    "contexte": "Contrat de prestation de services informatiques",
+    "contrat": """
+Entreprise A fournit des services de développement logiciel
+à Entreprise B pour une durée de 12 mois.
+"""
+})
 
-# print(response)
+print(response)
