@@ -7,3 +7,5 @@ fastapi
 uvicorn
 qdrant-client
 pypdf
+sentence-transformers 
+langchain-huggingface
