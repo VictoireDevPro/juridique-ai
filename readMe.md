@@ -1,0 +1,1 @@
+py -m app.test_vectorstore.py     
