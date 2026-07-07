@@ -22,3 +22,7 @@ Un contrat est valide si :
 2. Le consentement des parties est libre et éclairé
 3. L'objet du contrat est licite et déterminé
 4. La cause de l'obligation est licite
+
+Article 5: Succession de test
+Il faut que cette article soit aussi trouver
+lors de la recherche de similarité.

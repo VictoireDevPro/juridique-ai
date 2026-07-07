@@ -14,3 +14,7 @@ Sont nécessaires à la validité d'un contrat :
 1. Le consentement des parties contractantes
 2. Leur capacité de contracter
 3. Un contenu licite et certain
+
+Article 1130: Test similarité
+on doit trouver une similarité ici dans
+le code civil aussi.

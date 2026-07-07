@@ -18,6 +18,7 @@ def get_embeddings():
   """
   Modèle multilingue - supporte très bien le français juridique.
   Se télécharger automatiquement au premier appel (120MB).
+  charge en local (CPU) le modèle paraphrase-multilingual-MiniLM-L12-v2, qui transforme n'importe quel texte en un vecteur de 384 nombres décimaux (un point dans un espace à 384 dimensions). Deux textes proches en sens auront des vecteurs proches dans cet espace.
   """
 
   return HuggingFaceEmbeddings(
@@ -35,6 +36,17 @@ def get_qdrant_client() -> QdrantClient:
     _qdrant_client = QdrantClient(path=QDRANT_PATH)
   # return _qdrant_client local pour tests, sinon client distant pour production
   return QdrantClient(host="localhost", port=6333) # QdrantClient(path=QDRANT_PATH)
+
+def reset_collection(client: QdrantClient):
+  """
+  Supprime la collection si elle existe, pour repartir d'une base propre.
+  Utile en dev/test pour éviter d'accumuler des points dupliqués à chaque ré-indexation.
+  """
+  collections = [c.name for c in client.get_collections().collections]
+
+  if COLLECTION_NAME in collections:
+    client.delete_collection(COLLECTION_NAME)
+    print(f"🗑️  Collection '{COLLECTION_NAME}' supprimée.")
 
 def init_collection(client: QdrantClient):
   """
@@ -89,14 +101,15 @@ def load_vectorstore() -> QdrantVectorStore:
     collection_name=COLLECTION_NAME,
     embedding=embeddings,
   )
-  print(f"✅ Vectorstore chargé depuis {QDRANT_PATH} avec collection '{COLLECTION_NAME}'")
+  print(f"✅ Vectorstore chargé avec collection '{COLLECTION_NAME}'")
   return vectorstore
 
 def search(query: str, k: int = 4) -> list:
   """
   Recherche les k chunks les plus proches sémantiquement de la query.
+  Retourne une liste de tuples (Document, score) — score = similarité cosinus (0 à 1, plus haut = plus proche).
   """
   vectorstore = load_vectorstore()
-  results = vectorstore.similarity_search(query, k=k)
+  results = vectorstore.similarity_search_with_score(query, k=k)
   print(f"🔎 Recherche pour : '{query}'")
   return results
