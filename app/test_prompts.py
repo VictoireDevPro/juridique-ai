@@ -49,11 +49,11 @@ print("TEST 3 — Génération de clauses")
 
 chain_generate_clauses  = prompt_generate_clauses | llm | StrOutputParser()
 response = chain_generate_clauses.invoke({
-    "contexte": "Contrat de prestation de services informatiques",
-    "contrat": """
-Entreprise A fournit des services de développement logiciel
-à Entreprise B pour une durée de 12 mois.
-"""
+    "demande": "Contrat de prestation de services informatiques",
+#     "contrat": """
+# Entreprise A fournit des services de développement logiciel
+# à Entreprise B pour une durée de 12 mois.
+# """
 })
 
 print(response)
