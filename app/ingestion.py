@@ -3,6 +3,8 @@ from pathlib import Path
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+from app.vectorstore import load_vectorstore
+
 
 DATA_DIR = Path("data/juridique")
 
@@ -61,7 +63,7 @@ def load_base_juridique() -> list:
 
 
 def get_text_splitter() -> RecursiveCharacterTextSplitter:
-    """
+    """j
     RecursiveCharacterTextSplitter essaie de couper dans cet ordre :
     1. Double saut de ligne (entre paragraphes)
     2. Saut de ligne simple
@@ -70,8 +72,8 @@ def get_text_splitter() -> RecursiveCharacterTextSplitter:
     → Idéal pour les textes de loi structurés en articles
     """
     return RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200,
+        chunk_size=300,
+        chunk_overlap=50,
         separators=["\n\n", "\n", ".", " "],
         length_function=len
     )

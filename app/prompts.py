@@ -22,7 +22,13 @@ Format de tes réponses :
 # ── Prompt pour les questions générales ───────────────────────────────
 prompt_question = ChatPromptTemplate.from_messages([
     ("system", SYSTEM_JURIDIQUE),
-    ("human", "{question}")
+    ("human", """
+CONTEXTE :
+{context}
+
+QUESTION :
+{question}
+""")
 ])
 
 # ── Prompt pour l'analyse de contrat ──────────────────────────────────
@@ -49,14 +55,11 @@ prompt_generate_clauses = ChatPromptTemplate.from_messages([
     ("system", SYSTEM_JURIDIQUE),
 
     ("human", """
-Génère des clauses contractuelles conformes au droit OHADA
-et à la législation congolaise.
-
 CONTEXTE :
-{contexte}
+{context}
 
-CONTRAT :
-{contrat}
+DEMANDE :
+{demande}
 
 INSTRUCTIONS :
 - Utilise un style juridique professionnel

@@ -30,12 +30,11 @@ def get_embeddings():
 _qdrant_client: QdrantClient | None = None
 
 def get_qdrant_client() -> QdrantClient:
-  """Retourne un client Qdrant connecté au stockage local (singleton)."""
+  """Retourne le client Qdrant connecté au serveur Docker (singleton, réutilisé entre les appels)."""
   global _qdrant_client
   if _qdrant_client is None:
-    _qdrant_client = QdrantClient(path=QDRANT_PATH)
-  # return _qdrant_client local pour tests, sinon client distant pour production
-  return QdrantClient(host="localhost", port=6333) # QdrantClient(path=QDRANT_PATH)
+    _qdrant_client = QdrantClient(host="localhost", port=6333)
+  return _qdrant_client
 
 def reset_collection(client: QdrantClient):
   """
@@ -113,3 +112,19 @@ def search(query: str, k: int = 4) -> list:
   results = vectorstore.similarity_search_with_score(query, k=k)
   print(f"🔎 Recherche pour : '{query}'")
   return results
+
+
+def get_retriever(k: int = 4):
+    """
+    Retourne un retriever prêt à être branché dans une chain LCEL.
+    k = nombre de chunks retournés par recherche
+    """
+    vectorestore = load_vectorstore()
+
+    retriever = vectorestore.as_retriever(
+        search_type="similarity",
+        search_kwargs={"k": k}
+    )
+    
+    print(f"✅ Retriever prêt — top {k} résultats par recherche")
+    return retriever
