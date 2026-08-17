@@ -89,7 +89,7 @@ def index_documents(chunks: list) -> QdrantVectorStore:
 
 def load_vectorstore() -> QdrantVectorStore:
   """
-  Charge le vectorstore depuis le disque sans ré-indexer.
+  Charge le vectorstore depuis qdrant sans ré-indexer.
   À utiliser après la première indexation.
   """
   embeddings = get_embeddings()

@@ -1,1 +1,3 @@
-py -m app.test_vectorstore.py     
+py -m app.test_vectorstore.py 
+
+Plus tard apres avoir terminé tout les modules on va dynamiser le system prompt avec le moyen de le mettre a jour et le system prompt aura bien sur un doc template sur lequel il pourra s'appuyer, mais surtout l'IA va commencer a le batir par rapport au document uploader du coup si tu uploader des document uridique le system prompt se definir par rapport a cela, si tu uploade le document medecine il fait de mêmeêle.
