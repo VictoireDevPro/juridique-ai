@@ -14,18 +14,23 @@ COLLECTION_NAME = "base_juridique"
 EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2" 
 # EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2" 
 
+_embeddings: HuggingFaceEmbeddings | None = None
+
 def get_embeddings():
   """
   Modèle multilingue - supporte très bien le français juridique.
   Se télécharger automatiquement au premier appel (120MB).
   charge en local (CPU) le modèle paraphrase-multilingual-MiniLM-L12-v2, qui transforme n'importe quel texte en un vecteur de 384 nombres décimaux (un point dans un espace à 384 dimensions). Deux textes proches en sens auront des vecteurs proches dans cet espace.
+  Mis en cache (singleton) pour ne charger les poids qu'une seule fois par process.
   """
-
-  return HuggingFaceEmbeddings(
-    model_name=EMBEDDING_MODEL,
-    model_kwargs={"device": "cpu"},
-    encode_kwargs={"normalize_embeddings": True}
-  )
+  global _embeddings
+  if _embeddings is None:
+    _embeddings = HuggingFaceEmbeddings(
+      model_name=EMBEDDING_MODEL,
+      model_kwargs={"device": "cpu"},
+      encode_kwargs={"normalize_embeddings": True}
+    )
+  return _embeddings
 
 _qdrant_client: QdrantClient | None = None
 

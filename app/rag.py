@@ -79,7 +79,6 @@ def generate_clauses_base_on_existing():
         | StrOutputParser()
     )
 
-    print(f"+++++++++++++++++++++++++++++++++++Retriver found : ${retriever}")
     return chain
 
 # ── Initialiser la base juridique (premier lancement) ─────────────────

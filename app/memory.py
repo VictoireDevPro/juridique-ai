@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from app.llm import get_llm
 from app.prompts import prompt_rag_avec_memoire, prompt_reformulation
-from app.vectorstore import get_retriever, load_vectorstore
+from app.vectorstore import get_retriever
 from app.rag import format_docs
 
 # ── Store des sessions ────────────────────────────────────────────────
@@ -128,8 +128,8 @@ def training_memory():
 
         print(f"\n🤖 Assistant :\n{response}\n")
 
-if __name__ == "__main__":
-    training_memory()
+# if __name__ == "__main__":
+#     training_memory()
 
 
     
