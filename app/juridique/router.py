@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from app.juridique.memory import build_rag_chain_avec_memoire, get_session_history, store
+from app.juridique.memory import build_rag_chain_avec_memoire, get_session_history
 from app.juridique.rag import build_contrat_chain, generate_clauses_base_on_existing
 from app.juridique.schemas import (
   QuestionRequest, QuestionResponse,
@@ -82,16 +82,10 @@ async def effacer_session(current_user: User = Depends(get_current_user)):
     Efface l'historique de la session conversationnelle de l'utilisateur authentifié.
     """
     session_id = str(current_user.id)
-
-    if session_id in store:
-      del store[session_id]
-      return SessionResponse(
-          message=f"Session effacée avec succès",
-          session_id=session_id
-      )
+    get_session_history(session_id).clear()
 
     return SessionResponse(
-        message=f"Session introuvable ou déjà effacée",
+        message="Session effacée avec succès",
         session_id=session_id
     )
 

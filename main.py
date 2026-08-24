@@ -7,6 +7,7 @@ from app.juridique.ingestion import load_and_split_base_juridique
 from app.auth.router import router as auth_router
 from app.core.postgres import Base, engine
 from app.auth import models as auth_models
+from app.juridique import models as juridique_models
 from app.config import GROQ_MODEL
 
 

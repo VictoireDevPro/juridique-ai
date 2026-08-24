@@ -1,4 +1,3 @@
-from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
@@ -6,21 +5,15 @@ from app.juridique.llm import get_llm
 from app.juridique.prompts import prompt_rag_avec_memoire, prompt_reformulation
 from app.juridique.vectorstore import get_retriever
 from app.juridique.rag import format_docs
+from app.juridique.history import PostgresChatMessageHistory
 
-# ── Store des sessions ────────────────────────────────────────────────
-# En production ce serait Redis ou PostgreSQL
-# Pour le dev un dict en mémoire suffit
-store: dict[str, ChatMessageHistory] = {}
 
-def get_session_history(session_id: str) -> ChatMessageHistory:
+def get_session_history(session_id: str) -> PostgresChatMessageHistory:
     """
-    Retourne l'historique d'une session.
-    Crée la session si elle n'existe pas encore.
+    Retourne l'historique conversationnel de l'utilisateur (session_id = user_id),
+    persisté en Postgres.
     """
-    if session_id not in store:
-        store[session_id] = ChatMessageHistory()
-        print(f"🆕 Nouvelle session créée : {session_id}")
-    return store[session_id]
+    return PostgresChatMessageHistory(user_id=int(session_id))
 
 # ── Chain de reformulation ────────────────────────────────────────────
 def build_reformulation_chain():
