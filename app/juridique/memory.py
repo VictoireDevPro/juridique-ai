@@ -2,10 +2,10 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from app.llm import get_llm
-from app.prompts import prompt_rag_avec_memoire, prompt_reformulation
-from app.vectorstore import get_retriever
-from app.rag import format_docs
+from app.juridique.llm import get_llm
+from app.juridique.prompts import prompt_rag_avec_memoire, prompt_reformulation
+from app.juridique.vectorstore import get_retriever
+from app.juridique.rag import format_docs
 
 # ── Store des sessions ────────────────────────────────────────────────
 # En production ce serait Redis ou PostgreSQL

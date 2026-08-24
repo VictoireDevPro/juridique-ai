@@ -1,4 +1,4 @@
-from app.ingestion import load_and_split_base_juridique, load_txt
+from app.juridique.ingestion import load_and_split_base_juridique, load_txt
 
 # ── Test 1 : inspecter un Document ────────────────────────────────────
 print("=" * 50)

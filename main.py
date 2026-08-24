@@ -1,9 +1,13 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.router import router
-from app.schemas import HealthResponse
-from app.vectorstore import load_vectorstore, index_documents, get_qdrant_client, COLLECTION_NAME
-from app.ingestion import load_and_split_base_juridique
+from app.juridique.router import router
+from app.juridique.schemas import HealthResponse
+from app.juridique.vectorstore import load_vectorstore, index_documents, get_qdrant_client, COLLECTION_NAME
+from app.juridique.ingestion import load_and_split_base_juridique
+from app.auth.router import router as auth_router
+from app.core.postgres import Base, engine
+from app.auth import models as auth_models
+from app.config import GROQ_MODEL
 
 
 @asynccontextmanager
@@ -13,6 +17,9 @@ async def lifespan(app: FastAPI):
     Si la collection Qdrant est absente ou vide, on indexe automatiquement.
     """
     print("🚀 Démarrage de l'API Juridique...")
+
+    Base.metadata.create_all(bind=engine)
+    print("✅ Tables Postgres vérifiées/créées")
 
     client = get_qdrant_client()
     collections = [c.name for c in client.get_collections().collections]
@@ -41,6 +48,7 @@ app = FastAPI(
 )
 
 app.include_router(router)
+app.include_router(auth_router)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["Système"])
@@ -50,7 +58,7 @@ async def health():
         statut="operationnel",
         version="1.0.0",
         services={
-            "llm": "Groq — llama-3.3-70b-versatile",
+            "llm": f"Groq — {GROQ_MODEL}",
             "vectorstore": "Qdrant local",
             "embeddings": "paraphrase-multilingual-MiniLM-L12-v2"
         }

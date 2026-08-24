@@ -1,4 +1,4 @@
-from app.memory import build_rag_chain_avec_memoire, get_session_history
+from app.juridique.memory import build_rag_chain_avec_memoire, get_session_history
 
 chain = build_rag_chain_avec_memoire()
 

@@ -2,19 +2,14 @@ from pydantic import BaseModel, Field
 
 class QuestionRequest(BaseModel):
     question: str = Field(
-        min_length=5, 
+        min_length=5,
         description="La question juridique à poser"
-    )
-    session_id: str = Field(
-        default="default",
-        description="Identifiant de session pour la mémoire conversationnelle"
     )
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "question": "Quelles sont les conditions de validité d'un contrat ?",
-                "session_id": "user123"
+                "question": "Quelles sont les conditions de validité d'un contrat ?"
             }
         }
     }
@@ -34,12 +29,6 @@ class ContratRequest(BaseModel):
             }
         }
     }
-
-class SessionRequest(BaseModel):
-    session_id: str = Field(
-        ...,
-        description="Identifiant de session à effacer"
-    )
 
 class QuestionResponse(BaseModel):
     reponse: str

@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException
-from app.memory import build_rag_chain_avec_memoire, get_session_history, store
-from app.rag import build_contrat_chain, generate_clauses_base_on_existing
-from app.schemas import (
+from fastapi import APIRouter, HTTPException, Depends
+from app.juridique.memory import build_rag_chain_avec_memoire, get_session_history, store
+from app.juridique.rag import build_contrat_chain, generate_clauses_base_on_existing
+from app.juridique.schemas import (
   QuestionRequest, QuestionResponse,
-  ContratRequest, ContratResponse, SessionRequest, SessionResponse
+  ContratRequest, ContratResponse, SessionResponse
 )
+from app.auth.dependencies import get_current_user
+from app.auth.models import User
 
 router = APIRouter( prefix="/juridique", tags=["juridique"])
 
@@ -15,13 +17,14 @@ generer_clauses = generate_clauses_base_on_existing()
 
 
 @router.post("/question", response_model=QuestionResponse)
-async def poser_question(body: QuestionRequest):
+async def poser_question(body: QuestionRequest, current_user: User = Depends(get_current_user)):
     """
     Pose une question juridique à l'assistant RAG.
-    L'historique de conversation est maintenu par session_id.
+    L'historique de conversation est maintenu par utilisateur authentifié.
     """
-    try: 
-        config_session = {"configurable": {"session_id": body.session_id}}
+    try:
+        session_id = str(current_user.id)
+        config_session = {"configurable": {"session_id": session_id}}
         response = rag_chain.invoke(
             {"question": body.question},
             config=config_session
@@ -29,7 +32,7 @@ async def poser_question(body: QuestionRequest):
 
         return QuestionResponse(
             reponse=response,
-            session_id=body.session_id,
+            session_id=session_id,
         )
 
     except Exception as e:
@@ -40,7 +43,7 @@ async def poser_question(body: QuestionRequest):
 
 
 @router.post("/contrat", response_model=ContratResponse)
-async def analyser_contrat(body: ContratRequest):
+async def analyser_contrat(body: ContratRequest, current_user: User = Depends(get_current_user)):
     """
     Analyse un contrat selon le droit OHADA et la législation congolaise.
     """
@@ -57,7 +60,7 @@ async def analyser_contrat(body: ContratRequest):
 
 
 @router.post("/generer_clauses", response_model=ContratResponse)
-async def generer_clauses_endpoint(body: ContratRequest):
+async def generer_clauses_endpoint(body: ContratRequest, current_user: User = Depends(get_current_user)):
     """
     Génère des clauses à partir d'un contrat existant.
     """
@@ -74,32 +77,34 @@ async def generer_clauses_endpoint(body: ContratRequest):
 
 
 @router.delete("/session", response_model=SessionResponse)
-async def effacer_session(body: SessionRequest):
+async def effacer_session(current_user: User = Depends(get_current_user)):
     """
-    Efface l'historique d'une session conversationnelle.
+    Efface l'historique de la session conversationnelle de l'utilisateur authentifié.
     """
-    if body.session_id in store:
-      del store[body.session_id]
+    session_id = str(current_user.id)
+
+    if session_id in store:
+      del store[session_id]
       return SessionResponse(
           message=f"Session effacée avec succès",
-          session_id=body.session_id
+          session_id=session_id
       )
 
     return SessionResponse(
         message=f"Session introuvable ou déjà effacée",
-        session_id=body.session_id
+        session_id=session_id
     )
 
 
-@router.get("/session/{session_id}/historique")
-async def voir_historique(session_id: str):
+@router.get("/session/historique")
+async def voir_historique(current_user: User = Depends(get_current_user)):
     """
-    Retourne l'historique d'une session.
+    Retourne l'historique de la session de l'utilisateur authentifié.
     Utile pour déboguer ou afficher la conversation côté client.
     """
+    session_id = str(current_user.id)
     historique = get_session_history(session_id)
 
-    print(f"🔍 Historique de la session {session_id} =+===> {historique}")
     messages = []
     for msg in historique.messages:
         messages.append({

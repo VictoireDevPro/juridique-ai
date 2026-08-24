@@ -3,7 +3,7 @@ from pathlib import Path
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from app.vectorstore import load_vectorstore
+from app.juridique.vectorstore import load_vectorstore
 
 
 DATA_DIR = Path("data/juridique")
