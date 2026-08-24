@@ -1,5 +1,5 @@
-from app.ingestion import load_and_split_base_juridique
-from app.vectorstore import index_documents, search, reset_collection, get_qdrant_client
+from app.juridique.ingestion import load_and_split_base_juridique
+from app.juridique.vectorstore import index_documents, search, reset_collection, get_qdrant_client
 
 
 # ── Test 1 : indexation ───────────────────────────────────────────────

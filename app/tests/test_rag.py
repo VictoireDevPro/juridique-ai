@@ -1,4 +1,4 @@
-from app.rag import build_rag_chain, build_contrat_chain, generate_clauses_base_on_existing
+from app.juridique.rag import build_rag_chain, build_contrat_chain, generate_clauses_base_on_existing
 
 # ── Test 1 : Question juridique via RAG ───────────────────────────────
 print("=" * 50)

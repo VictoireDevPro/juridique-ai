@@ -1,4 +1,4 @@
-from app.llm import get_llm
+from app.juridique.llm import get_llm
 
 llm = get_llm()
 

@@ -1,5 +1,5 @@
-from app.llm import get_llm
-from app.prompts import prompt_question, prompt_analyse_contrat, prompt_generate_clauses
+from app.juridique.llm import get_llm
+from app.juridique.prompts import prompt_question, prompt_analyse_contrat, prompt_generate_clauses
 from langchain_core.output_parsers import StrOutputParser
 
 

@@ -1,4 +1,4 @@
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 # ── Prompt système : le "caractère" de ton assistant ──────────────────
 SYSTEM_JURIDIQUE = """
@@ -77,4 +77,30 @@ FORMAT :
 ## Clause de garantie
 ...
 """)
+])
+
+
+
+# ── Prompt RAG avec mémoire conversationnelle ─────────────────────────
+prompt_rag_avec_memoire = ChatPromptTemplate.from_messages([
+    ("system", SYSTEM_JURIDIQUE),
+    MessagesPlaceholder(variable_name="chat_history"),  # historique injecté ici
+    ("human", """
+Contexte juridique pertinent :
+{context}
+
+Question :
+{question}
+""")
+])
+
+# ── Prompt pour reformuler la question avec l'historique ──────────────
+prompt_reformulation = ChatPromptTemplate.from_messages([
+    ("system", """Tu es un assistant qui reformule les questions.
+Étant donné l'historique de conversation et la nouvelle question,
+reformule la question pour qu'elle soit autonome et compréhensible
+sans l'historique. Si la question est déjà autonome, retourne-la telle quelle.
+Réponds uniquement avec la question reformulée, rien d'autre."""),
+    MessagesPlaceholder(variable_name="chat_history"),
+    ("human", "{question}")
 ])

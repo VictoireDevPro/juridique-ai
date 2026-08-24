@@ -1,8 +1,8 @@
-from app.ingestion import load_and_split_base_juridique
-from app.llm import get_llm
+from app.juridique.ingestion import load_and_split_base_juridique
+from app.juridique.llm import get_llm
 from langchain_core.output_parsers import StrOutputParser
-from app.prompts import prompt_question, prompt_analyse_contrat, prompt_generate_clauses
-from app.vectorstore import get_retriever, index_documents
+from app.juridique.prompts import prompt_question, prompt_analyse_contrat, prompt_generate_clauses
+from app.juridique.vectorstore import get_retriever, index_documents
 from langchain_core.runnables import RunnablePassthrough
 from operator import itemgetter
 
@@ -79,7 +79,6 @@ def generate_clauses_base_on_existing():
         | StrOutputParser()
     )
 
-    print(f"+++++++++++++++++++++++++++++++++++Retriver found : ${retriever}")
     return chain
 
 # ── Initialiser la base juridique (premier lancement) ─────────────────
