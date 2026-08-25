@@ -8,6 +8,7 @@ from app.juridique.schemas import (
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
 
+
 router = APIRouter( prefix="/juridique", tags=["juridique"])
 
 
@@ -26,7 +27,7 @@ async def poser_question(body: QuestionRequest, current_user: User = Depends(get
         session_id = str(current_user.id)
         config_session = {"configurable": {"session_id": session_id}}
         response = rag_chain.invoke(
-            {"question": body.question},
+            {"question": body.question, "source": body.source},
             config=config_session
         )
 
