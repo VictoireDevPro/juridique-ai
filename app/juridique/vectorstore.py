@@ -7,6 +7,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Filter, FieldCondition, MatchValue
+
 
 
 QDRANT_PATH = "./qdrant_storage"
@@ -132,4 +134,24 @@ def get_retriever(k: int = 4):
     )
     
     print(f"✅ Retriever prêt — top {k} résultats par recherche")
+    return retriever
+
+def get_retriever_filtre(source: str, k: int = 4):
+    """
+    Retourne un retriever filtré par catégorie juridique.
+    source: "OHADA", "Congo" ou "tous" (pas de filtre).
+    """
+    vectorestore = load_vectorstore()
+    search_kwargs = {"k": k}
+    if source != "tous":
+        search_kwargs["filter"] = Filter(
+          must=[FieldCondition(key="metadata.categorie", match=MatchValue(value=source))]
+        )
+
+    retriever = vectorestore.as_retriever(
+        search_type="similarity",
+        search_kwargs=search_kwargs
+    )
+    
+    print(f"✅ Retriever filtré prêt — top {k} résultats pour source '{source}'")
     return retriever

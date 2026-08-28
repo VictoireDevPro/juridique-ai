@@ -5,6 +5,10 @@ class QuestionRequest(BaseModel):
         min_length=5,
         description="La question juridique à poser"
     )
+    source: str = Field(
+        default="tous",
+        description="La source juridique à utiliser pour la recherche (OHADA, Congo, etc.)"
+    )
 
     model_config = {
         "json_schema_extra": {

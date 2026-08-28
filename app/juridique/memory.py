@@ -3,7 +3,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from app.juridique.llm import get_llm
 from app.juridique.prompts import prompt_rag_avec_memoire, prompt_reformulation
-from app.juridique.vectorstore import get_retriever
+from app.juridique.vectorstore import get_retriever, get_retriever_filtre
 from app.juridique.rag import format_docs
 from app.juridique.history import PostgresChatMessageHistory
 
@@ -49,7 +49,6 @@ def build_rag_chain_avec_memoire():
     llm → réponse
     """
     llm = get_llm()
-    retriever = get_retriever(k=4)
     reformulation_chain = build_reformulation_chain()
 
     # ── Étape 1 : reformuler la question ──────────────────────────────
@@ -62,6 +61,8 @@ def build_rag_chain_avec_memoire():
 
         print(f"\n🔄 Question reformulée : {question_reformulee}")
 
+        source = input_dict.get("source", "tous")
+        retriever = get_retriever_filtre(source=source)
         docs = retriever.invoke(question_reformulee)
         context = format_docs(docs)
 
