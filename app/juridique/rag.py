@@ -5,6 +5,10 @@ from app.juridique.prompts import prompt_question, prompt_analyse_contrat, promp
 from app.juridique.vectorstore import get_retriever, index_documents
 from langchain_core.runnables import RunnablePassthrough
 from operator import itemgetter
+from langchain_core.output_parsers import PydanticOutputParser
+from app.juridique.prompts import prompt_analyse_contrat_structure
+from app.juridique.schemas import AnalyseContrat
+
 
 
 # ── Formater les documents récupérés en texte lisible ─────────────────
@@ -60,6 +64,21 @@ def build_contrat_chain():
     chain = prompt_analyse_contrat | llm | StrOutputParser()
 
     return chain
+
+def build_contrat_chain_structure():
+    """
+    Comme build_contrat_chain, mais force une sortie JSON typée
+    au lieu de texte libre.
+    """
+    llm = get_llm()
+    parser = PydanticOutputParser(pydantic_object=AnalyseContrat)
+    prompt = prompt_analyse_contrat_structure.partial(
+        format_instructions=parser.get_format_instructions()
+    )
+
+    chain = prompt | llm | parser
+    return chain
+
 
 def generate_clauses_base_on_existing():
     """

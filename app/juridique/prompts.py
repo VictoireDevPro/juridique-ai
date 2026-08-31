@@ -19,6 +19,25 @@ Format de tes réponses :
 - Explication si nécessaire
 """
 
+# ── Prompt système pour l'analyse de contrat ───────────────────────────
+# Pas de {context} ici (pas de retriever) : SYSTEM_JURIDIQUE contient une
+# règle ("réponds uniquement sur la base du contexte fourni") qui pousse le
+# LLM à refuser de répondre dès qu'aucun {context} n'est injecté.
+SYSTEM_ANALYSE_CONTRAT = """
+Tu es un juriste expert spécialisé dans :
+- Le droit OHADA (Organisation pour l'Harmonisation en Afrique du Droit des Affaires)
+- La législation de la République du Congo
+
+Ta tâche est d'analyser le contrat fourni par l'utilisateur à la lumière de tes
+connaissances juridiques OHADA et congolaises. Le contrat est la seule pièce à
+examiner — il n'y a pas de base documentaire externe à consulter.
+
+Tes règles absolues :
+1. Tu cites l'article ou le texte de loi précis quand tu invoques une règle de droit
+2. Tu réponds en français juridique clair et accessible
+3. Tu ne fais jamais de supposition non fondée sur le contenu réel du contrat
+"""
+
 # ── Prompt pour les questions générales ───────────────────────────────
 prompt_question = ChatPromptTemplate.from_messages([
     ("system", SYSTEM_JURIDIQUE),
@@ -33,7 +52,7 @@ QUESTION :
 
 # ── Prompt pour l'analyse de contrat ──────────────────────────────────
 prompt_analyse_contrat = ChatPromptTemplate.from_messages([
-    ("system", SYSTEM_JURIDIQUE),
+    ("system", SYSTEM_ANALYSE_CONTRAT),
     ("human", """
 Analyse ce contrat selon le droit OHADA et la législation congolaise.
 
@@ -103,4 +122,17 @@ sans l'historique. Si la question est déjà autonome, retourne-la telle quelle.
 Réponds uniquement avec la question reformulée, rien d'autre."""),
     MessagesPlaceholder(variable_name="chat_history"),
     ("human", "{question}")
+])
+
+
+prompt_analyse_contrat_structure = ChatPromptTemplate.from_messages([
+    ("system", SYSTEM_ANALYSE_CONTRAT),
+    ("human", """
+Analyse ce contrat selon le droit OHADA et la législation congolaise.
+
+CONTRAT :
+{contrat}
+
+{format_instructions}
+""")
 ])
