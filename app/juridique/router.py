@@ -7,6 +7,7 @@ from app.juridique.schemas import (
 )
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
+from fastapi.responses import StreamingResponse
 
 
 router = APIRouter( prefix="/juridique", tags=["juridique"])
@@ -112,3 +113,19 @@ async def voir_historique(current_user: User = Depends(get_current_user)):
         "nombre_messages": len(messages),
         "messages": messages
     }
+
+@router.post("/questions/stream")
+async def poser_question_stream(body: QuestionRequest, current_user: User = Depends(get_current_user)):
+        """
+        Comme /question, mais streame la réponse token par token.
+        """
+        session_id = str(current_user.id)
+        config_session = { "configurable": { "session_id": session_id }}
+        
+        async def generer_tokens():
+            async for chunk in rag_chain.astream(
+                { "question": body.question, "source": body.source },
+                config=config_session
+            ):
+                yield chunk
+        return StreamingResponse(generer_tokens(), media_type="text/plain")
