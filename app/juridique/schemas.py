@@ -54,3 +54,12 @@ class HealthResponse(BaseModel):
     statut: str
     version: str
     services: dict
+
+class AnalyseContrat(BaseModel):
+    nature_juridique: str
+    parties: list[str]
+    clauses_conformes: list[str]
+    clauses_manquantes: list[str]
+    risques: list[str]
+    recommandations: list[str]
+    score_conformite: int = Field(ge=0, le=100)

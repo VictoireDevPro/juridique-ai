@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.juridique.memory import build_rag_chain_avec_memoire, get_session_history
-from app.juridique.rag import build_contrat_chain, generate_clauses_base_on_existing
+from app.juridique.rag import build_contrat_chain, build_contrat_chain_structure, generate_clauses_base_on_existing
 from app.juridique.schemas import (
-  QuestionRequest, QuestionResponse,
+  AnalyseContrat, QuestionRequest, QuestionResponse,
   ContratRequest, ContratResponse, SessionResponse
 )
 from app.auth.dependencies import get_current_user
@@ -15,6 +15,7 @@ router = APIRouter( prefix="/juridique", tags=["juridique"])
 
 rag_chain = build_rag_chain_avec_memoire()
 contrat_chain = build_contrat_chain()
+contrat_chain_structure = build_contrat_chain_structure()
 generer_clauses = generate_clauses_base_on_existing()
 
 
@@ -129,3 +130,18 @@ async def poser_question_stream(body: QuestionRequest, current_user: User = Depe
             ):
                 yield chunk
         return StreamingResponse(generer_tokens(), media_type="text/plain")
+
+
+@router.post("/contrat/structure", response_model=AnalyseContrat)
+async def analyser_contrat_structure(body: ContratRequest, current_user: User = Depends(get_current_user)):
+    """
+    Comme /contrat, mais retourne une analyse structurée en JSON typé.
+    """
+    try:
+        return contrat_chain_structure.invoke({"contrat": body.contrat})
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de l'analyse structurée du contrat : {str(e)}"
+        )
