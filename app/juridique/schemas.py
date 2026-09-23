@@ -63,3 +63,13 @@ class AnalyseContrat(BaseModel):
     risques: list[str]
     recommandations: list[str]
     score_conformite: int = Field(ge=0, le=100)
+
+class DocumentIndexeResponse(BaseModel):
+    nom_fichier: str
+    categorie: str
+    nombre_chunks: int
+
+class DocumentInfo(BaseModel):
+    source: str
+    categorie: str
+    nombre_chunks: int

@@ -24,6 +24,22 @@ def load_txt(filepath: str) -> list:
     # print(f" +++++++++++++++++++++Document loaded: {documents}")
     return documents
 
+def load_document(filepath: str) -> list:
+    """
+    Charge un document (PDF ou TXT) selon son extension
+    """
+    path = Path(filepath)
+    if not path.exists():
+        raise FileNotFoundError(f"Le fichier '{filepath}' n'existe pas.")
+
+    if path.suffix.lower() == ".pdf":
+        return load_pdf(filepath)
+    elif path.suffix.lower() == ".txt":
+        return load_txt(filepath)
+    else:
+        raise ValueError(f"Extension de fichier non supportée : {path.suffix}")
+
+
 def load_directory(directory: str, extension: str = ".txt") -> list:
     """Charge tous les fichiers d'un répertoire avec une extension donnée."""
     loader = DirectoryLoader(

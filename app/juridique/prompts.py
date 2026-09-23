@@ -117,7 +117,7 @@ Question :
 prompt_reformulation = ChatPromptTemplate.from_messages([
     ("system", """Tu es un assistant qui reformule les questions.
 Étant donné l'historique de conversation et la nouvelle question,
-reformule la question pour qu'elle soit autonome et compréhensible
+reformule la question pour qu'e lle soit autonome et compréhensible
 sans l'historique. Si la question est déjà autonome, retourne-la telle quelle.
 Réponds uniquement avec la question reformulée, rien d'autre."""),
     MessagesPlaceholder(variable_name="chat_history"),

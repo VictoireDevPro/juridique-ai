@@ -4,3 +4,7 @@ __pycache__/
 
 qdrant_storage/
 *.log
+
+# Documents uploadés via /juridique/admin/document (runtime, pas versionnés)
+data/juridique/*.txt
+data/juridique/*.pdf
