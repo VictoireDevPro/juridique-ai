@@ -1,13 +1,16 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, File, Form, HTTPException, Depends, UploadFile
+from app.juridique.ingestion import DATA_DIR, load_document, get_text_splitter 
 from app.juridique.memory import build_rag_chain_avec_memoire, get_session_history
 from app.juridique.rag import build_contrat_chain, build_contrat_chain_structure, generate_clauses_base_on_existing
 from app.juridique.schemas import (
-  AnalyseContrat, QuestionRequest, QuestionResponse,
+  AnalyseContrat, DocumentIndexeResponse, DocumentInfo, QuestionRequest, QuestionResponse,
   ContratRequest, ContratResponse, SessionResponse
 )
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
 from fastapi.responses import StreamingResponse
+from pathlib import Path
+from app.juridique.vectorstore import index_documents, list_documents_indexes
 
 
 router = APIRouter( prefix="/juridique", tags=["juridique"])
@@ -145,3 +148,50 @@ async def analyser_contrat_structure(body: ContratRequest, current_user: User = 
             status_code=500,
             detail=f"Erreur lors de l'analyse structurée du contrat : {str(e)}"
         )
+
+
+@router.post("/admin/document", response_model=DocumentIndexeResponse)
+async def ajouter_document(
+    fichier: UploadFile = File(),
+    categorie: str = Form("OHADA"),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Upload un document (PDF ou TXT), l'indexe immédiatement dans Qdrant.
+    """
+
+    extension = Path(fichier.filename).suffix.lower()
+    if extension not in [".pdf", ".txt"]:
+        raise HTTPException(status_code=400, detail="Seuls les fichiers .pdf et .txt sont acceptés")
+
+    try:
+        build_path = DATA_DIR / Path(fichier.filename)
+        content  = await fichier.read()
+
+        #write on the disk in binary mode "wb"
+        with open(build_path, "wb") as f:
+            f.write(content)
+
+        document_loaded = load_document(str(build_path))
+        for doc in document_loaded:
+            doc.metadata["categorie"] = categorie
+        documents_chunks = get_text_splitter().split_documents(document_loaded)
+        index_documents(documents_chunks)
+
+        return DocumentIndexeResponse(
+            nom_fichier=fichier.filename,
+            categorie=categorie,
+            nombre_chunks=len(documents_chunks)
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erreur lors de l'ajout du document : {str(e)}"
+        )
+
+
+@router.get("/admin/documents", response_model=list[DocumentInfo])
+async def lister_documents(current_user: User = Depends(get_current_user)):
+    """Liste les documents indexés dans Qdrant avec leur nombre de chunks."""
+    return list_documents_indexes()

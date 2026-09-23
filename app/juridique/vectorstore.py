@@ -155,3 +155,34 @@ def get_retriever_filtre(source: str, k: int = 4):
     
     print(f"✅ Retriever filtré prêt — top {k} résultats pour source '{source}'")
     return retriever
+
+def list_documents_indexes() -> list[dict]:
+    """
+    Liste les documents indexés dans Qdrant, groupés par fichier source,
+    avec leur nombre de chunks. Parcourt toute la collection par pages
+    (scroll), car il n'y a pas d'agrégation "group by" côté API Qdrant.
+    """
+    client = get_qdrant_client()
+    compteurs: dict[tuple[str, str], int] = {}
+    offset = None
+
+    while True:
+        points, offset = client.scroll(
+            collection_name=COLLECTION_NAME,
+            limit=200,
+            offset=offset,
+            with_payload=True,
+            with_vectors=False,
+        )
+        for point in points:
+            metadata = point.payload.get("metadata", {})
+            cle = (metadata.get("source", "inconnu"), metadata.get("categorie", "inconnu"))
+            compteurs[cle] = compteurs.get(cle, 0) + 1
+
+        if offset is None:
+            break
+
+    return [
+        {"source": source, "categorie": categorie, "nombre_chunks": n}
+        for (source, categorie), n in compteurs.items()
+    ]
