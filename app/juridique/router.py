@@ -9,6 +9,7 @@ from app.juridique.schemas import (
 from app.auth.dependencies import get_current_user
 from app.auth.models import User
 from fastapi.responses import StreamingResponse
+from functools import lru_cache
 from pathlib import Path
 from app.juridique.vectorstore import index_documents, list_documents_indexes
 
@@ -16,10 +17,24 @@ from app.juridique.vectorstore import index_documents, list_documents_indexes
 router = APIRouter( prefix="/juridique", tags=["juridique"])
 
 
-rag_chain = build_rag_chain_avec_memoire()
-contrat_chain = build_contrat_chain()
-contrat_chain_structure = build_contrat_chain_structure()
-generer_clauses = generate_clauses_base_on_existing()
+# Les chains sont construites à la première requête (puis mises en cache), et non à l'import :
+# elles chargent la collection Qdrant, qui n'existe pas encore tant que le lifespan
+# de main.py n'a pas indexé la base juridique au premier démarrage.
+@lru_cache
+def get_rag_chain():
+    return build_rag_chain_avec_memoire()
+
+@lru_cache
+def get_contrat_chain():
+    return build_contrat_chain()
+
+@lru_cache
+def get_contrat_chain_structure():
+    return build_contrat_chain_structure()
+
+@lru_cache
+def get_generer_clauses():
+    return generate_clauses_base_on_existing()
 
 
 @router.post("/question", response_model=QuestionResponse)
@@ -31,7 +46,7 @@ async def poser_question(body: QuestionRequest, current_user: User = Depends(get
     try:
         session_id = str(current_user.id)
         config_session = {"configurable": {"session_id": session_id}}
-        response = rag_chain.invoke(
+        response = get_rag_chain().invoke(
             {"question": body.question, "source": body.source},
             config=config_session
         )
@@ -54,7 +69,7 @@ async def analyser_contrat(body: ContratRequest, current_user: User = Depends(ge
     Analyse un contrat selon le droit OHADA et la législation congolaise.
     """
     try:
-        analyse = contrat_chain.invoke({"contrat": body.contrat})
+        analyse = get_contrat_chain().invoke({"contrat": body.contrat})
 
         return ContratResponse(analyse=analyse)
 
@@ -71,7 +86,7 @@ async def generer_clauses_endpoint(body: ContratRequest, current_user: User = De
     Génère des clauses à partir d'un contrat existant.
     """
     try:
-        clauses = generer_clauses.invoke({"demande": body.contrat})
+        clauses = get_generer_clauses().invoke({"demande": body.contrat})
 
         return ContratResponse(analyse=clauses)
 
@@ -127,7 +142,7 @@ async def poser_question_stream(body: QuestionRequest, current_user: User = Depe
         config_session = { "configurable": { "session_id": session_id }}
         
         async def generer_tokens():
-            async for chunk in rag_chain.astream(
+            async for chunk in get_rag_chain().astream(
                 { "question": body.question, "source": body.source },
                 config=config_session
             ):
@@ -141,7 +156,7 @@ async def analyser_contrat_structure(body: ContratRequest, current_user: User = 
     Comme /contrat, mais retourne une analyse structurée en JSON typé.
     """
     try:
-        return contrat_chain_structure.invoke({"contrat": body.contrat})
+        return get_contrat_chain_structure().invoke({"contrat": body.contrat})
 
     except Exception as e:
         raise HTTPException(
